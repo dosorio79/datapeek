@@ -1,0 +1,19 @@
+[project]
+name = "datapeek"
+version = "0.1.0"
+description = "Fast, minimal profiler for CSV and Parquet files"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jinja2>=3.1.6",
+    "polars>=1.39.3",
+    "robyn>=0.83.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

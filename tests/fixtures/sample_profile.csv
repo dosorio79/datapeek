@@ -1,0 +1,13 @@
+customer_id,status,churn_flag,segment,mostly_missing,notes,mixed_value,opt_in_text,score
+C0001,active,0,A,,First onboarding touchpoint,10,yes,10.5
+C0002,active,0,A,,Second onboarding touchpoint,12,no,11.0
+C0003,active,0,B,,Renewal reminder sent,unknown,yes,12.3
+C0004,active,1,B,,Customer asked for downgrade,7,yes,9.8
+C0005,active,0,A,7,Escalation resolved,15,no,13.1
+C0006,active,0,C,,Usage alert acknowledged,14,yes,8.6
+C0007,active,0,A,,Payment plan adjusted,3,no,14.2
+C0008,,1,B,,Support ticket closed,8,yes,7.4
+C0009,active,0,A,,Retention email delivered,1,yes,15.6
+C0010,active,0,C,4,Quarterly check-in complete,0,no,6.9
+C0011,active,0,B,,In-app hint shown,5,yes,16.4
+C0012,active,0,A,,Churn survey pending,x,no,5.1
