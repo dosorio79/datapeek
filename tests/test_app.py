@@ -8,6 +8,7 @@ from robyn.testing import TestClient as RobynClient
 
 from app.main import create_app
 from app.services.file_reader import UploadedFile, read_uploaded_file
+from app.services.heuristics import detect_column_signals
 from app.services.profiler import build_profile_view_model
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -163,3 +164,49 @@ def _extract_hidden_value(html: str, field_name: str) -> str:
     start = html.index(marker) + len(marker)
     end = html.index('"', start)
     return html[start:end]
+
+
+def test_numeric_discrete_encoding_signal():
+    series = pl.Series("rating", [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2])
+    row_count = len(series)
+    unique_count = series.n_unique()
+    missing_count = series.null_count()
+
+    signals = detect_column_signals(
+        column_name="rating",
+        series=series,
+        row_count=row_count,
+        unique_count=unique_count,
+        missing_count=missing_count,
+    )
+
+    kinds = {s["kind"] for s in signals}
+    assert "Possible numeric discrete" in kinds
+
+
+def test_numeric_discrete_signal_not_emitted_for_binary():
+    series = pl.Series("flag", [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+    row_count = len(series)
+    signals = detect_column_signals(
+        column_name="flag",
+        series=series,
+        row_count=row_count,
+        unique_count=series.n_unique(),
+        missing_count=series.null_count(),
+    )
+    kinds = {s["kind"] for s in signals}
+    assert "Possible numeric discrete" not in kinds
+
+
+def test_numeric_discrete_signal_not_emitted_for_id_column():
+    series = pl.Series("user_id", list(range(1, 21)))
+    row_count = len(series)
+    signals = detect_column_signals(
+        column_name="user_id",
+        series=series,
+        row_count=row_count,
+        unique_count=series.n_unique(),
+        missing_count=series.null_count(),
+    )
+    kinds = {s["kind"] for s in signals}
+    assert "Possible numeric discrete" not in kinds

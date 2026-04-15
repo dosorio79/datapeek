@@ -19,6 +19,7 @@ TARGET_BOOLEAN_SETS = (
 
 ID_HINT_PATTERN = re.compile(r"(?:^|_)(id|key|code)(?:$|_)")
 VALUE_COUNT_CANDIDATE_UNIQUE_RATIO = 0.10
+NUMERIC_DISCRETE_MAX_UNIQUE = 10
 
 
 def detect_column_signals(
@@ -84,6 +85,14 @@ def detect_column_signals(
 
     if not has_binary_signal and not is_boolean_like and _is_likely_categorical(series, unique_count, row_count):
         signals.append(_signal(column_name, "Likely categorical", f"{unique_count} distinct values"))
+
+    if not has_binary_signal and _is_numeric_discrete(
+        column_name=column_name,
+        series=non_null,
+        unique_count=non_null_unique_count,
+        non_null_unique_ratio=non_null_unique_ratio,
+    ):
+        signals.append(_signal(column_name, "Possible numeric discrete", f"{non_null_unique_count} distinct integer values"))
 
     return signals
 
@@ -165,5 +174,23 @@ def _looks_numeric(value: str) -> bool:
     try:
         float(value)
     except ValueError:
+        return False
+    return True
+
+
+def _is_numeric_discrete(
+    *,
+    column_name: str,
+    series: pl.Series,
+    unique_count: int,
+    non_null_unique_ratio: float,
+) -> bool:
+    if not series.dtype.is_integer():
+        return False
+    if unique_count < 3 or unique_count > NUMERIC_DISCRETE_MAX_UNIQUE:
+        return False
+    if non_null_unique_ratio >= 0.90:
+        return False
+    if bool(ID_HINT_PATTERN.search(column_name.lower())):
         return False
     return True
