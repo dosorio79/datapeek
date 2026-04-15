@@ -3,6 +3,9 @@
   <img src="app/img/datapeek-logo.png" alt="DataPeek logo" width="420">
 </picture>
 
+[![CI](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml/badge.svg)](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Fast, minimal profiler for CSV and Parquet files.
 
 DataPeek is a small server-rendered app built with Robyn, Polars, and Jinja2. It gives a technical user a quick first-pass read on a dataset without turning the UI into a full EDA tool.
