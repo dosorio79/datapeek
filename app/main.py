@@ -72,5 +72,5 @@ def create_app() -> Robyn:
 app = create_app()
 
 
-def run() -> None:
-    app.start()
+def run(port: int = 8080) -> None:
+    app.start(port=port)

@@ -6,8 +6,10 @@ PYTEST := uv run pytest
 install:
 	uv sync --group dev
 
+PORT ?= 8080
+
 run:
-	$(PYTHON) main.py
+	$(PYTHON) main.py --port $(PORT)
 
 test:
 	$(PYTEST) -q
