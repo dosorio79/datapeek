@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import polars as pl
 from robyn.testing import TestClient as RobynClient
 
+from main import parse_runtime_config
 from app.main import create_app
 from app.services.file_reader import UploadedFile, read_uploaded_file
 from app.services.heuristics import detect_column_signals
@@ -157,6 +158,32 @@ def test_routes_render_profile_and_resample():
 
     assert resample_response.status_code == 200
     assert "Sample rows (random)" in resample_response.text
+
+
+def test_health_endpoint_returns_ok():
+    client = RobynClient(create_app())
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.text == '{"status":"ok"}'
+
+
+def test_runtime_config_prefers_environment_port_and_default_host():
+    host, port = parse_runtime_config(environ={"PORT": "9090"})
+
+    assert host == "0.0.0.0"
+    assert port == 9090
+
+
+def test_runtime_config_allows_cli_overrides():
+    host, port = parse_runtime_config(
+        argv=["--host", "127.0.0.1", "--port", "7001"],
+        environ={"HOST": "0.0.0.0", "PORT": "9090"},
+    )
+
+    assert host == "127.0.0.1"
+    assert port == 7001
 
 
 def _extract_hidden_value(html: str, field_name: str) -> str:

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: datapeek
+    runtime: python
+    plan: starter
+    healthCheckPath: /health
+    buildCommand: "pip install uv && uv sync --locked"
+    startCommand: "uv run python main.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10

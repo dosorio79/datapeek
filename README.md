@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml/badge.svg)](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-informational)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.1-informational)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/)
 
 Fast, minimal profiler for CSV and Parquet files.
@@ -33,6 +33,12 @@ make run
 ```
 
 Open `http://127.0.0.1:8080`.
+
+The launcher also respects `PORT` and `HOST`, which is useful for managed platforms:
+
+```bash
+PORT=9090 HOST=0.0.0.0 uv run python main.py
+```
 
 ## Test
 
@@ -74,3 +80,20 @@ make test      # run pytest
 make check     # run tests and py_compile
 make clean     # remove pytest and Python cache files
 ```
+
+## Render Deployment
+
+`render.yaml` configures DataPeek as a single Render web service on the paid `starter` plan.
+
+- Health check: `/health`
+- Build command: `pip install uv && uv sync --locked`
+- Start command: `uv run python main.py`
+- Python version: `3.12.10`
+
+Operational assumptions for this deployment:
+
+- Uploads and resample tokens are stored in process memory only.
+- Restart, redeploy, or crash clears uploaded file state.
+- The service should stay at a single instance unless upload state is moved out of memory.
+- A starter instance is the recommended baseline because the app parses uploaded CSV and Parquet files in memory with Polars.
+- Keep uploads modest in size. The app will warn on larger files, but this MVP is not optimized for large datasets or concurrent heavy uploads.

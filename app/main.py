@@ -25,6 +25,14 @@ def create_app() -> Robyn:
     register_home_routes(app=app, templates=TEMPLATES)
     register_profile_routes(app=app, templates=TEMPLATES, upload_store=UPLOAD_STORE)
 
+    @app.get("/health")
+    def health():
+        return Response(
+            status_code=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            description='{"status":"ok"}',
+        )
+
     @app.get("/static/styles.css")
     def styles():
         stylesheet = (BASE_DIR / "static" / "styles.css").read_text(encoding="utf-8")
@@ -72,5 +80,5 @@ def create_app() -> Robyn:
 app = create_app()
 
 
-def run(port: int = 8080) -> None:
-    app.start(port=port)
+def run(*, host: str = "0.0.0.0", port: int = 8080) -> None:
+    app.start(host=host, port=port)
