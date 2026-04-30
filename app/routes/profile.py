@@ -50,13 +50,17 @@ def register_profile_routes(*, app: Robyn, templates: JinjaTemplate, upload_stor
             )
             return templates.render_template("home.html", **context)
 
-        dataframe, read_time_ms, warnings = read_uploaded_file(uploaded_file)
-        context = build_profile_view_model(
-            uploaded_file=uploaded_file,
-            dataframe=dataframe,
-            read_time_ms=read_time_ms,
-            warnings=warnings,
-            upload_token=token,
-            sample_seed=sample_seed,
-        )
+        try:
+            dataframe, read_time_ms, warnings = read_uploaded_file(uploaded_file)
+            context = build_profile_view_model(
+                uploaded_file=uploaded_file,
+                dataframe=dataframe,
+                read_time_ms=read_time_ms,
+                warnings=warnings,
+                upload_token=token,
+                sample_seed=sample_seed,
+            )
+        except FileValidationError as exc:
+            context = empty_view_model(error_message=str(exc))
+
         return templates.render_template("home.html", **context)

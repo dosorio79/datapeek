@@ -7,7 +7,7 @@
 
 **Name:** DataPeek  
 **Type:** Single-page web app  
-**Current version:** 0.1.1  
+**Current version:** 0.1.2  
 
 **Goal:**
 > Understand a dataset in seconds.
@@ -22,15 +22,16 @@
 
 ## 2. Version Roadmap
 
-### 0.1.1 — Current Version
+### 0.1.2 — Current Version
 
-MVP first-contact profiler for CSV and Parquet files.
+MVP first-contact profiler for CSV and Parquet files, with upload hardening.
 
 Focus:
 - upload CSV or Parquet
 - return a fast single-page profile
 - surface high-signal column warnings
 - show schema, missingness, uniqueness, numeric summaries, and sample rows
+- reject uploads above 100 MB before parsing or caching
 - avoid charts, correlations, dashboards, and exploratory workflows
 
 ---
@@ -100,7 +101,7 @@ Existing tools:
 
 ---
 
-## 6. 0.1.1 Current Scope
+## 6. 0.1.x Current Scope
 
 ### Input
 - Upload:
@@ -109,7 +110,8 @@ Existing tools:
 
 ### File Constraints
 - Recommended max size: **≤ 50–100 MB**  
-- Larger files: not optimized (acceptable limitation for MVP)  
+- Files above **100 MB** are rejected before parsing  
+- Files above **50 MB** may show a large-file warning  
 
 ---
 

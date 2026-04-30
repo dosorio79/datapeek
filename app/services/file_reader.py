@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import csv
-import re
 from email.parser import BytesParser
 from email.policy import default
 from dataclasses import dataclass
@@ -13,7 +12,7 @@ import polars as pl
 
 
 _CSV_DELIMITER_CANDIDATES = (",", ";", "\t")
-_FILENAME_PATTERN = re.compile(r'filename="([^"]+)"')
+MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 
 
 class FileValidationError(ValueError):
@@ -41,15 +40,23 @@ class UploadedFile:
 
         candidate = _unwrap_uploaded_value(files)
         filename = preferred_filename or _read_attr(candidate, "filename") or _read_attr(candidate, "name") or "upload"
-        content = _read_bytes(candidate)
 
-        if filename == "upload" and request is not None:
+        if request is not None and (filename == "upload" or candidate is None):
             multipart_file = _extract_upload_from_multipart_request(request)
             if multipart_file is not None:
                 return multipart_file
 
+        try:
+            content = _read_bytes(candidate)
+        except FileValidationError:
+            if request is not None:
+                multipart_file = _extract_upload_from_multipart_request(request)
+                if multipart_file is not None:
+                    return multipart_file
+            raise
         if not content:
             raise FileValidationError("Upload a non-empty CSV or Parquet file.")
+        _validate_upload_size(content)
 
         lowered = filename.lower()
         if lowered.endswith(".csv"):
@@ -180,7 +187,7 @@ def _unwrap_uploaded_value(files: Any) -> Any:
 
     if isinstance(candidate, list):
         if not candidate:
-            raise FileValidationError("Upload a CSV or Parquet file before analyzing.")
+            return None
         return candidate[0]
 
     return candidate
@@ -246,12 +253,6 @@ def _extract_upload_from_multipart_request(request: Any) -> UploadedFile | None:
     if not content_type or "multipart/form-data" not in content_type.lower():
         return None
 
-    raw_filename = _extract_filename_from_body(body)
-    if raw_filename is not None:
-        file_type = _file_type_from_filename(raw_filename)
-        if file_type is not None:
-            return UploadedFile(filename=raw_filename, content=_extract_payload_from_multipart(body), file_type=file_type)
-
     message = BytesParser(policy=default).parsebytes(
         f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + bytes(body)
     )
@@ -274,30 +275,13 @@ def _extract_upload_from_multipart_request(request: Any) -> UploadedFile | None:
         else:
             raise FileValidationError("Unsupported file type. Upload a CSV or Parquet file.")
 
+        if not payload:
+            raise FileValidationError("Upload a non-empty CSV or Parquet file.")
+        _validate_upload_size(payload)
+
         return UploadedFile(filename=filename, content=payload, file_type=file_type)
 
     return None
-
-
-def _extract_filename_from_body(body: bytes) -> str | None:
-    match = _FILENAME_PATTERN.search(body.decode("utf-8", errors="ignore"))
-    if match is None:
-        return None
-    return match.group(1)
-
-
-def _extract_payload_from_multipart(body: bytes) -> bytes:
-    # Fall back to a very small multipart extraction routine for Robyn bodies
-    # that do not round-trip cleanly through the email parser.
-    header_break = b"\r\n\r\n"
-    start = body.find(header_break)
-    if start == -1:
-        return body
-    payload = body[start + len(header_break) :]
-    end_marker = payload.rfind(b"\r\n--")
-    if end_marker == -1:
-        return payload
-    return payload[:end_marker]
 
 
 def _header_value(headers: Any, key: str) -> str | None:
@@ -334,6 +318,12 @@ def _infer_file_type(content: bytes) -> str | None:
         return None
 
     return "csv" if dataframe.width >= 1 else None
+
+
+def _validate_upload_size(content: bytes) -> None:
+    if len(content) > MAX_UPLOAD_BYTES:
+        max_mb = MAX_UPLOAD_BYTES // (1024 * 1024)
+        raise FileValidationError(f"Upload is too large. DataPeek currently supports files up to {max_mb} MB.")
 
 
 def _file_type_from_filename(filename: str) -> str | None:

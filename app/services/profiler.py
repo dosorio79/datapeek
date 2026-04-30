@@ -199,6 +199,6 @@ def _truncate(value: str, max_length: int = 50) -> str:
 
 def _size_warning(content: bytes) -> list[str]:
     size_mb = len(content) / (1024 * 1024)
-    if size_mb <= 100:
+    if size_mb <= 50:
         return []
-    return [f"Large file ({size_mb:.1f} MB). DataPeek will try to profile it, but the MVP is not optimized for large uploads."]
+    return [f"Large file ({size_mb:.1f} MB). DataPeek accepts up to 100 MB, but smaller files profile more reliably."]

@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml/badge.svg)](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.1-informational)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.2-informational)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/)
 
 Fast, minimal profiler for CSV and Parquet files.
@@ -97,4 +97,4 @@ Operational assumptions for this deployment:
 - The service should stay at a single instance unless upload state is moved out of memory.
 - Render free web services spin down after 15 minutes of inactivity, so the first request after idle can take about a minute to recover.
 - Free web services do not support persistent disks or scaling beyond a single instance.
-- Keep uploads modest in size. The app will warn on larger files, but this MVP is not optimized for large datasets or concurrent heavy uploads.
+- Keep uploads modest in size. The app warns above 50 MB and rejects uploads above 100 MB.

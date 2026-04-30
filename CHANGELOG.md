@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project uses semantic versioning tags.
 
+## [0.1.2] - 2026-04-30
+
+### Changed
+- Multipart fallback parsing now selects only the `dataset` file part and no longer uses broad filename/payload slicing.
+- Upload intake now rejects files above 100 MB before parsing or caching.
+- Large-file warnings now start above 50 MB.
+- Resample now renders validation errors instead of bubbling parse failures.
+
+### Added
+- Regression tests for raw multipart fallback, multi-part dataset selection, oversized upload rejection, and resample validation errors.
+
 ## [0.1.1] - 2026-04-20
 
 ### Added

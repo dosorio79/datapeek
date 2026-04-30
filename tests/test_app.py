@@ -6,9 +6,11 @@ from types import SimpleNamespace
 import polars as pl
 from robyn.testing import TestClient as RobynClient
 
+import app.routes.profile as profile_routes
+import app.services.file_reader as file_reader
 from main import parse_runtime_config
 from app.main import create_app
-from app.services.file_reader import UploadedFile, read_uploaded_file
+from app.services.file_reader import FileValidationError, UploadedFile, read_uploaded_file
 from app.services.heuristics import detect_column_signals
 from app.services.profiler import build_profile_view_model
 
@@ -91,6 +93,50 @@ def test_extracts_filename_from_multipart_request_when_files_are_raw_bytes():
     assert uploaded_file.content == csv_bytes
 
 
+def test_extracts_upload_from_multipart_request_when_files_are_missing():
+    csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
+    boundary = "----DataPeekBoundary"
+    body = (
+        f"--{boundary}\r\n"
+        'Content-Disposition: form-data; name="dataset"; filename="sample_profile.csv"\r\n'
+        "Content-Type: text/csv\r\n\r\n"
+    ).encode("utf-8") + csv_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
+    request = SimpleNamespace(
+        body=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+
+    uploaded_file = UploadedFile.from_request_files(None, request=request)
+
+    assert uploaded_file.filename == "sample_profile.csv"
+    assert uploaded_file.file_type == "csv"
+    assert uploaded_file.content == csv_bytes
+
+
+def test_multipart_extraction_selects_dataset_part_only():
+    csv_bytes = b"id,name\n1,Alice\n"
+    decoy_bytes = b"not,the,dataset\n"
+    boundary = "----DataPeekBoundary"
+    body = (
+        f"--{boundary}\r\n"
+        'Content-Disposition: form-data; name="attachment"; filename="decoy.csv"\r\n'
+        "Content-Type: text/csv\r\n\r\n"
+    ).encode("utf-8") + decoy_bytes + (
+        f"\r\n--{boundary}\r\n"
+        'Content-Disposition: form-data; name="dataset"; filename="customers.csv"\r\n'
+        "Content-Type: text/csv\r\n\r\n"
+    ).encode("utf-8") + csv_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
+    request = SimpleNamespace(
+        body=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+
+    uploaded_file = UploadedFile.from_request_files(None, request=request)
+
+    assert uploaded_file.filename == "customers.csv"
+    assert uploaded_file.content == csv_bytes
+
+
 def test_extracts_filename_from_string_multipart_body():
     csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
     boundary = "----DataPeekBoundary"
@@ -109,6 +155,17 @@ def test_extracts_filename_from_string_multipart_body():
 
     assert uploaded_file.filename == "original_name.csv"
     assert uploaded_file.file_type == "csv"
+
+
+def test_rejects_oversized_upload(monkeypatch):
+    monkeypatch.setattr(file_reader, "MAX_UPLOAD_BYTES", 10)
+
+    try:
+        UploadedFile.from_request_files({"dataset": b"id,name\n1,Alice\n"}, preferred_filename="customers.csv")
+    except FileValidationError as exc:
+        assert "currently supports files up to" in str(exc)
+    else:
+        raise AssertionError("Expected oversized upload to be rejected")
 
 
 def test_infers_csv_type_when_filename_metadata_is_missing():
@@ -158,6 +215,29 @@ def test_routes_render_profile_and_resample():
 
     assert resample_response.status_code == 200
     assert "Sample rows (random)" in resample_response.text
+
+
+def test_resample_renders_validation_errors(monkeypatch):
+    client = RobynClient(create_app())
+    csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
+    analyze_response = client.post(
+        "/analyze",
+        files={"dataset": {"filename": "sample_profile.csv", "content": csv_bytes}},
+    )
+    token = _extract_hidden_value(analyze_response.text, "upload_token")
+
+    def fail_read(*args, **kwargs):
+        raise FileValidationError("Could not parse cached upload.")
+
+    monkeypatch.setattr(profile_routes, "read_uploaded_file", fail_read)
+
+    resample_response = client.post(
+        "/resample",
+        form_data={"upload_token": token, "resample_seed": "43"},
+    )
+
+    assert resample_response.status_code == 200
+    assert "Could not parse cached upload." in resample_response.text
 
 
 def test_health_endpoint_returns_ok():
