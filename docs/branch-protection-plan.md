@@ -8,7 +8,7 @@ The GitHub UI path below is retained only as a manual fallback.
 ## Terraform
 
 The Terraform config protects:
-- `master`: PR required, no approving review required, stale review dismissal, CI status check `test`, signed commits, no force pushes, no deletion, admin enforcement.
+- `master`: PR required, no approving review required, stale review dismissal, CI status check `test`, no force pushes, no deletion, admin enforcement.
 - `dev`: no force pushes, deletion allowed, no PR requirement.
 
 Apply flow:
@@ -30,7 +30,7 @@ Target policy:
 - CI required
 - No force push
 - No deletion
-- Signed commits required
+- Signed commits not required unless local signing is configured
 
 Click path:
 1. Open GitHub repo: dosorio79/datapeek.
@@ -41,7 +41,7 @@ Click path:
 6. In that section, set required approvals to 0.
 7. Turn on Require status checks to pass before merging.
 8. In required checks, select test (job from CI workflow).
-9. Turn on Require signed commits.
+9. Leave Require signed commits off unless local commit signing is configured.
 10. Ensure Allow force pushes is off.
 11. Ensure Allow deletions is off.
 12. Click Create (or Save changes).

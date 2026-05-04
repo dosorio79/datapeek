@@ -30,7 +30,7 @@ resource "github_branch_protection" "master" {
     contexts = ["test"]
   }
 
-  require_signed_commits = true
+  require_signed_commits = false
   allows_force_pushes    = false
   allows_deletions       = false
   enforce_admins         = true # no bypassing settings
