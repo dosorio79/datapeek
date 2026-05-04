@@ -35,6 +35,69 @@ body {
   animation: shell-in 220ms ease-out;
 }
 
+.help-menu {
+  position: fixed;
+  top: 0.85rem;
+  right: max(0.85rem, calc((100vw - 1180px) / 2));
+  z-index: 10;
+}
+
+.help-menu summary {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 700;
+  list-style: none;
+  box-shadow: 0 8px 24px rgba(47, 53, 93, 0.08);
+}
+
+.help-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(360px, calc(100vw - 1rem));
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 16px 36px rgba(47, 53, 93, 0.14);
+}
+
+.help-panel h2 {
+  margin-bottom: 0.45rem;
+  font-size: 1rem;
+}
+
+.help-panel p {
+  margin: 0.55rem 0;
+  color: var(--muted);
+}
+
+.help-panel code {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.help-panel ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1rem;
+}
+
+.help-panel li + li {
+  margin-top: 0.25rem;
+}
+
 .hero {
   margin-bottom: 0.5rem;
 }
@@ -82,20 +145,27 @@ h2 {
 
 .upload-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(220px, auto) minmax(280px, 1fr);
   gap: 0.75rem;
   align-items: center;
   width: 100%;
 }
 
-.upload-meta {
+.upload-source {
   min-width: 0;
 }
 
-.upload-copy {
+.upload-source-file {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+.s3-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .label,
@@ -107,6 +177,21 @@ h2 {
 
 input[type="file"] {
   flex: 1 1 280px;
+}
+
+input[type="text"] {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.58rem 0.7rem;
+  color: var(--ink);
+  font: inherit;
+}
+
+input[type="text"]:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: #8ba5ca;
 }
 
 .sr-only {
@@ -311,7 +396,16 @@ summary {
     padding-top: 1.5rem;
   }
 
+  .help-menu {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
   .upload-form {
+    grid-template-columns: 1fr;
+  }
+
+  .s3-controls {
     grid-template-columns: 1fr;
   }
 

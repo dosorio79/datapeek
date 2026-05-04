@@ -7,15 +7,20 @@
 
   <section class="panel">
     <form action="/analyze" method="post" enctype="multipart/form-data" class="upload-form" id="upload-form">
-      <div class="upload-meta">
-        <div class="upload-copy">
-          <label for="dataset" class="label">Dataset file</label>
-          <p class="input-help">CSV or Parquet.</p>
+      <div class="upload-source upload-source-file">
+        <label for="dataset" class="label">Dataset file</label>
+        <p class="input-help">CSV or Parquet.</p>
+        <input id="dataset" name="dataset" type="file" accept=".csv,.parquet" class="sr-only">
+        <input id="dataset-name" name="dataset_name" type="hidden">
+        <button type="button" id="upload-trigger">Upload & analyze</button>
+      </div>
+      <div class="upload-source upload-source-s3">
+        <label for="s3-uri" class="label">S3 / MinIO object</label>
+        <div class="s3-controls">
+          <input id="s3-uri" name="s3_uri" type="text" inputmode="url" placeholder="s3://bucket/path/data.csv">
+          <button type="submit">Analyze S3</button>
         </div>
       </div>
-      <input id="dataset" name="dataset" type="file" accept=".csv,.parquet" required class="sr-only">
-      <input id="dataset-name" name="dataset_name" type="hidden">
-      <button type="button" id="upload-trigger">Upload & analyze</button>
     </form>
     {% if error_message %}
       <p class="message error">{{ error_message }}</p>

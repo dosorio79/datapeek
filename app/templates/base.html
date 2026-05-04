@@ -10,6 +10,22 @@
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
+    <details class="help-menu">
+      <summary aria-label="Help">?</summary>
+      <div class="help-panel">
+        <h2>Help</h2>
+        <p>Use a local CSV/Parquet file or an S3-compatible URI.</p>
+        <code>s3://bucket/path/data.csv</code>
+        <p>For MinIO or private S3, configure the server environment:</p>
+        <ul>
+          <li><code>DATAPEEK_S3_ENDPOINT_URL</code></li>
+          <li><code>DATAPEEK_S3_ACCESS_KEY_ID</code></li>
+          <li><code>DATAPEEK_S3_SECRET_ACCESS_KEY</code></li>
+          <li><code>DATAPEEK_S3_REGION</code></li>
+        </ul>
+        <p>Uploads and S3 objects are limited to 100 MB.</p>
+      </div>
+    </details>
     <main class="shell">
       {% block content %}{% endblock %}
     </main>

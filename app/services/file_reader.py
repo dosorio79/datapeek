@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 from email.parser import BytesParser
 from email.policy import default
-from dataclasses import dataclass
 from io import BytesIO
 from time import perf_counter
 from typing import Any
 
 import polars as pl
+
+from app.services.s3_reader import S3ReadError, download_s3_object, parse_s3_uri
 
 
 _CSV_DELIMITER_CANDIDATES = (",", ";", "\t")
@@ -73,6 +75,31 @@ class UploadedFile:
                 raise FileValidationError("Unsupported file type. Upload a CSV or Parquet file.")
 
         return cls(filename=filename, content=content, file_type=file_type)
+
+    @classmethod
+    def from_s3_uri(cls, s3_uri: str) -> "UploadedFile":
+        """Download an S3-compatible object into the same in-memory upload model."""
+
+        try:
+            bucket, key = parse_s3_uri(s3_uri)
+        except S3ReadError as exc:
+            raise FileValidationError(str(exc)) from exc
+
+        filename = key.rsplit("/", 1)[-1]
+        file_type = _file_type_from_filename(filename)
+        if file_type is None:
+            raise FileValidationError("Unsupported S3 object type. Use a CSV or Parquet object.")
+
+        try:
+            content = download_s3_object(bucket=bucket, key=key, max_bytes=MAX_UPLOAD_BYTES)
+        except S3ReadError as exc:
+            raise FileValidationError(str(exc)) from exc
+
+        if not content:
+            raise FileValidationError("S3 object is empty. Use a non-empty CSV or Parquet object.")
+        _validate_upload_size(content)
+
+        return cls(filename=s3_uri, content=content, file_type=file_type)
 
 
 def read_uploaded_file(uploaded_file: UploadedFile) -> tuple[pl.DataFrame, int, list[str]]:
@@ -322,8 +349,12 @@ def _infer_file_type(content: bytes) -> str | None:
 
 def _validate_upload_size(content: bytes) -> None:
     if len(content) > MAX_UPLOAD_BYTES:
-        max_mb = MAX_UPLOAD_BYTES // (1024 * 1024)
-        raise FileValidationError(f"Upload is too large. DataPeek currently supports files up to {max_mb} MB.")
+        _raise_oversized_upload()
+
+
+def _raise_oversized_upload() -> None:
+    max_mb = MAX_UPLOAD_BYTES // (1024 * 1024)
+    raise FileValidationError(f"Upload is too large. DataPeek currently supports files up to {max_mb} MB.")
 
 
 def _file_type_from_filename(filename: str) -> str | None:

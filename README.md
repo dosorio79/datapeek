@@ -5,12 +5,12 @@
 
 [![CI](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml/badge.svg)](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.2-informational)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.0-informational)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/)
 
 Fast, minimal profiler for CSV and Parquet files.
 
-DataPeek is a small server-rendered app built with Robyn, Polars, and Jinja2. It gives a technical user a quick first-pass read on a dataset without turning the UI into a full EDA tool.
+DataPeek is a small server-rendered app built with Robyn, Polars, and Jinja2. It gives a technical user a quick first-pass read on a local, S3, or MinIO dataset without turning the UI into a full EDA tool.
 
 ## Setup
 
@@ -40,6 +40,23 @@ The launcher also respects `PORT` and `HOST`, which is useful for managed platfo
 PORT=9090 HOST=0.0.0.0 uv run python main.py
 ```
 
+DataPeek accepts local CSV/Parquet uploads and S3-compatible object URIs:
+
+```text
+s3://bucket/path/data.csv
+```
+
+For private AWS S3 or MinIO-compatible buckets, configure credentials through environment variables:
+
+```bash
+DATAPEEK_S3_ENDPOINT_URL=http://localhost:9000  # MinIO/custom S3 only
+DATAPEEK_S3_ACCESS_KEY_ID=minioadmin
+DATAPEEK_S3_SECRET_ACCESS_KEY=minioadmin
+DATAPEEK_S3_REGION=us-east-1
+```
+
+If `DATAPEEK_S3_ENDPOINT_URL` is set, DataPeek uses path-style requests such as `http://localhost:9000/bucket/path/data.csv`, which matches MinIO's default setup. Without credentials, DataPeek attempts anonymous reads.
+
 ## Test
 
 Run the test suite:
@@ -66,6 +83,9 @@ app/
 app/img/               Logo and icon source assets
 tests/                 Route, service, delimiter, and storage tests
 docs/PRD.md            Product requirements
+docs/branch-protection-plan.md
+                       Terraform-managed GitHub branch protection policy
+infra/github/          Terraform for GitHub repository settings
 agents.md              Repository guidance for coding agents
 main.py                Thin root launcher
 Makefile               Common developer commands
@@ -80,6 +100,13 @@ make test      # run pytest
 make check     # run tests and py_compile
 make clean     # remove pytest and Python cache files
 ```
+
+## Repository Operations
+
+GitHub branch protection is managed with Terraform in `infra/github`.
+The current solo-maintainer policy requires PRs and the `test` CI check for `master`, without requiring a second approving reviewer.
+
+See [docs/branch-protection-plan.md](docs/branch-protection-plan.md) for the policy and apply workflow.
 
 ## Render Deployment
 

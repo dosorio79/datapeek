@@ -1,74 +1,66 @@
-# Branch Protection Plan
+# Branch Protection
 
-Repository: dosorio79/datapeek
+Repository: `dosorio79/datapeek`
 
-Branch protection is managed as Terraform in [infra/github](../infra/github).
-The GitHub UI path below is retained only as a manual fallback.
+Branch protection is managed with Terraform in [infra/github](../infra/github).
+Do not edit these rules manually in the GitHub UI except for emergency recovery.
 
-## Terraform
+## Policy
 
-The Terraform config protects:
-- `master`: PR required, no approving review required, stale review dismissal, CI status check `test`, no force pushes, no deletion, admin enforcement.
-- `dev`: no force pushes, deletion allowed, no PR requirement.
+`master` is the protected release branch:
 
-Apply flow:
+- Pull request required before merge.
+- Required approving reviews: `0`, because this is a solo-maintained repo.
+- Required status check: `test` from [.github/workflows/ci.yml](../.github/workflows/ci.yml).
+- Branch must be up to date before merge.
+- Force pushes disabled.
+- Branch deletion disabled.
+- Admin enforcement enabled.
+- Signed commits are not required.
+
+`dev` is the working branch:
+
+- Direct pushes allowed.
+- Force pushes disabled.
+- Branch deletion allowed.
+- Pull requests and status checks are not required.
+
+## Apply Changes
+
+Create a local ignored `infra/github/terraform.tfvars` file with a GitHub token:
+
+```hcl
+github_token = "..."
+```
+
+Then run:
 
 ```bash
 cd infra/github
 terraform init
-terraform plan -var='github_token=...'
-terraform apply -var='github_token=...'
+terraform fmt
+terraform validate
+terraform plan
+terraform apply
 ```
 
-You can also provide the token via a local ignored `terraform.tfvars` file.
+## Verify
 
-## Path 1: Protect master
+After applying, run:
 
-Target policy:
-- PR required
-- No approving review required for solo maintenance
-- CI required
-- No force push
-- No deletion
-- Signed commits not required unless local signing is configured
+```bash
+cd infra/github
+terraform plan
+```
 
-Click path:
-1. Open GitHub repo: dosorio79/datapeek.
-2. Go to Settings -> Branches.
-3. Under Branch protection rules, click Add rule.
-4. Branch name pattern: master.
-5. Turn on Require a pull request before merging.
-6. In that section, set required approvals to 0.
-7. Turn on Require status checks to pass before merging.
-8. In required checks, select test (job from CI workflow).
-9. Leave Require signed commits off unless local commit signing is configured.
-10. Ensure Allow force pushes is off.
-11. Ensure Allow deletions is off.
-12. Click Create (or Save changes).
+Expected result:
 
-Recommended strictness:
-- Turn on Do not allow bypassing the above settings.
-
-## Path 2: Leave dev semi-open
-
-Target policy:
-- No force push
-- CI required only if easy (optional)
-- PR not required
-
-Click path:
-1. Open GitHub repo: dosorio79/datapeek.
-2. Go to Settings -> Branches.
-3. Under Branch protection rules, click Add rule.
-4. Branch name pattern: dev.
-5. Leave Require a pull request before merging off.
-6. Ensure Allow force pushes is off.
-7. Leave Allow deletions on (semi-open).
-8. CI option:
-   - If you want CI enforced now, turn on Require status checks to pass before merging and select test.
-   - If you want faster iteration, leave status checks off for now.
-9. Click Create (or Save changes).
+```text
+No changes. Your infrastructure matches the configuration.
+```
 
 ## Notes
-- The status check to use is test from the CI workflow at [.github/workflows/ci.yml](../.github/workflows/ci.yml).
-- If your default branch is main, use main instead of master in the branch name pattern.
+
+- Commit `.terraform.lock.hcl`.
+- Do not commit `terraform.tfvars`, `terraform.tfstate`, `terraform.tfstate.backup`, or `.terraform/`.
+- If this repo later gains regular reviewers, raise `required_approving_review_count` in [main.tf](../infra/github/main.tf) from `0` to `1`.
