@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project uses semantic versioning tags.
 
+## [0.2.0] - 2026-05-05
+
+### Added
+- S3-compatible dataset input for CSV and Parquet objects.
+- MinIO and custom S3 endpoint support through `DATAPEEK_S3_ENDPOINT_URL`.
+- Optional SigV4 request signing through S3 credential environment variables.
+- UI input for analyzing `s3://bucket/path/file.csv` and `.parquet` objects.
+- README-based help menu for local, S3, and MinIO usage.
+- Tests for S3 URI parsing, MinIO-style path requests, signed headers, and route integration.
+
+### Changed
+- Split S3-compatible object reading into `app/services/s3_reader.py`.
+- README now documents S3/MinIO dataset input and repository branch-protection operations.
+- Branch protection documentation now treats Terraform as the source of truth.
+
 ## [0.1.2] - 2026-04-30
 
 ### Changed

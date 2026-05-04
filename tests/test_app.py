@@ -270,6 +270,16 @@ def test_route_analyzes_s3_uri(monkeypatch):
     assert "Column Overview" in response.text
 
 
+def test_home_renders_help_menu():
+    client = RobynClient(create_app())
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "S3-compatible URI" in response.text
+    assert "DATAPEEK_S3_ENDPOINT_URL" in response.text
+
+
 def test_resample_renders_validation_errors(monkeypatch):
     client = RobynClient(create_app())
     csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()

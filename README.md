@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml/badge.svg)](https://github.com/dosorio79/datapeek/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.2-informational)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.0-informational)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/)
 
 Fast, minimal profiler for CSV and Parquet files.
