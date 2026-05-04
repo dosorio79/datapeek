@@ -14,8 +14,13 @@ def register_profile_routes(*, app: Robyn, templates: JinjaTemplate, upload_stor
     @app.post("/analyze")
     def analyze(request=None, files=None, form_data=None):
         try:
-            preferred_filename = (form_data or {}).get("dataset_name")
-            uploaded_file = UploadedFile.from_request_files(files, request=request, preferred_filename=preferred_filename)
+            form = form_data or {}
+            s3_uri = (form.get("s3_uri") or "").strip()
+            if s3_uri:
+                uploaded_file = UploadedFile.from_s3_uri(s3_uri)
+            else:
+                preferred_filename = form.get("dataset_name")
+                uploaded_file = UploadedFile.from_request_files(files, request=request, preferred_filename=preferred_filename)
             dataframe, read_time_ms, warnings = read_uploaded_file(uploaded_file)
             token = upload_store.save(uploaded_file)
             context = build_profile_view_model(

@@ -10,7 +10,7 @@
 
 Fast, minimal profiler for CSV and Parquet files.
 
-DataPeek is a small server-rendered app built with Robyn, Polars, and Jinja2. It gives a technical user a quick first-pass read on a dataset without turning the UI into a full EDA tool.
+DataPeek is a small server-rendered app built with Robyn, Polars, and Jinja2. It gives a technical user a quick first-pass read on a local, S3, or MinIO dataset without turning the UI into a full EDA tool.
 
 ## Setup
 
@@ -39,6 +39,23 @@ The launcher also respects `PORT` and `HOST`, which is useful for managed platfo
 ```bash
 PORT=9090 HOST=0.0.0.0 uv run python main.py
 ```
+
+DataPeek accepts local CSV/Parquet uploads and S3-compatible object URIs:
+
+```text
+s3://bucket/path/data.csv
+```
+
+For private AWS S3 or MinIO-compatible buckets, configure credentials through environment variables:
+
+```bash
+DATAPEEK_S3_ENDPOINT_URL=http://localhost:9000  # MinIO/custom S3 only
+DATAPEEK_S3_ACCESS_KEY_ID=minioadmin
+DATAPEEK_S3_SECRET_ACCESS_KEY=minioadmin
+DATAPEEK_S3_REGION=us-east-1
+```
+
+If `DATAPEEK_S3_ENDPOINT_URL` is set, DataPeek uses path-style requests such as `http://localhost:9000/bucket/path/data.csv`, which matches MinIO's default setup. Without credentials, DataPeek attempts anonymous reads.
 
 ## Test
 

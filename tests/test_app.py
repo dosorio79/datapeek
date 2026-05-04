@@ -190,6 +190,38 @@ def test_prefers_filename_from_form_data_when_metadata_is_missing():
     assert uploaded_file.file_type == "csv"
 
 
+def test_reads_public_s3_uri_through_upload_model(monkeypatch):
+    csv_bytes = b"zone_id,zone_name\n1,Newark Airport\n"
+    calls = []
+
+    def download_s3_object(*, bucket, key, max_bytes):
+        calls.append((bucket, key))
+        return csv_bytes
+
+    monkeypatch.setattr(file_reader, "download_s3_object", download_s3_object)
+
+    uploaded_file = UploadedFile.from_s3_uri("s3://nyc-tlc/misc/taxi_zone_lookup.csv")
+
+    assert calls == [("nyc-tlc", "misc/taxi_zone_lookup.csv")]
+    assert uploaded_file.filename == "s3://nyc-tlc/misc/taxi_zone_lookup.csv"
+    assert uploaded_file.file_type == "csv"
+    assert uploaded_file.content == csv_bytes
+
+
+def test_rejects_unsupported_s3_object_type(monkeypatch):
+    def fail_download(*, bucket, key, max_bytes):
+        raise AssertionError("Unsupported extension should be rejected before download")
+
+    monkeypatch.setattr(file_reader, "download_s3_object", fail_download)
+
+    try:
+        UploadedFile.from_s3_uri("s3://bucket/path/data.json")
+    except FileValidationError as exc:
+        assert "Unsupported S3 object type" in str(exc)
+    else:
+        raise AssertionError("Expected unsupported S3 object to be rejected")
+
+
 def test_routes_render_profile_and_resample():
     client = RobynClient(create_app())
     csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
@@ -215,6 +247,27 @@ def test_routes_render_profile_and_resample():
 
     assert resample_response.status_code == 200
     assert "Sample rows (random)" in resample_response.text
+
+
+def test_route_analyzes_s3_uri(monkeypatch):
+    client = RobynClient(create_app())
+    csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
+
+    def download_s3_object(*, bucket, key, max_bytes):
+        assert bucket == "nyc-tlc"
+        assert key == "misc/taxi_zone_lookup.csv"
+        return csv_bytes
+
+    monkeypatch.setattr(file_reader, "download_s3_object", download_s3_object)
+
+    response = client.post(
+        "/analyze",
+        form_data={"s3_uri": "s3://nyc-tlc/misc/taxi_zone_lookup.csv"},
+    )
+
+    assert response.status_code == 200
+    assert "s3://nyc-tlc/misc/taxi_zone_lookup.csv" in response.text
+    assert "Column Overview" in response.text
 
 
 def test_resample_renders_validation_errors(monkeypatch):
