@@ -18,9 +18,9 @@ resource "github_branch_protection" "master" {
   repository_id = var.repository
   pattern       = "master"
 
-  # PR required before merging (at least 1 approval)
+  # PR required before merging. Solo repo: CI gates the merge, not self-review.
   required_pull_request_reviews {
-    required_approving_review_count = 1
+    required_approving_review_count = 0
     dismiss_stale_reviews           = true
   }
 

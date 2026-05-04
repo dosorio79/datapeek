@@ -8,7 +8,7 @@ The GitHub UI path below is retained only as a manual fallback.
 ## Terraform
 
 The Terraform config protects:
-- `master`: PR required, 1 approval, stale review dismissal, CI status check `test`, signed commits, no force pushes, no deletion, admin enforcement.
+- `master`: PR required, no approving review required, stale review dismissal, CI status check `test`, signed commits, no force pushes, no deletion, admin enforcement.
 - `dev`: no force pushes, deletion allowed, no PR requirement.
 
 Apply flow:
@@ -26,6 +26,7 @@ You can also provide the token via a local ignored `terraform.tfvars` file.
 
 Target policy:
 - PR required
+- No approving review required for solo maintenance
 - CI required
 - No force push
 - No deletion
@@ -37,7 +38,7 @@ Click path:
 3. Under Branch protection rules, click Add rule.
 4. Branch name pattern: master.
 5. Turn on Require a pull request before merging.
-6. In that section, keep at least 1 approval required.
+6. In that section, set required approvals to 0.
 7. Turn on Require status checks to pass before merging.
 8. In required checks, select test (job from CI workflow).
 9. Turn on Require signed commits.
