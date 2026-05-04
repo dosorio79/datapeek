@@ -66,6 +66,9 @@ app/
 app/img/               Logo and icon source assets
 tests/                 Route, service, delimiter, and storage tests
 docs/PRD.md            Product requirements
+docs/branch-protection-plan.md
+                       Terraform-managed GitHub branch protection policy
+infra/github/          Terraform for GitHub repository settings
 agents.md              Repository guidance for coding agents
 main.py                Thin root launcher
 Makefile               Common developer commands
@@ -80,6 +83,13 @@ make test      # run pytest
 make check     # run tests and py_compile
 make clean     # remove pytest and Python cache files
 ```
+
+## Repository Operations
+
+GitHub branch protection is managed with Terraform in `infra/github`.
+The current solo-maintainer policy requires PRs and the `test` CI check for `master`, without requiring a second approving reviewer.
+
+See [docs/branch-protection-plan.md](docs/branch-protection-plan.md) for the policy and apply workflow.
 
 ## Render Deployment
 
