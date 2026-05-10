@@ -38,25 +38,52 @@ Focus:
 
 ---
 
-### 0.4.0 — Next Product Evolution
+### 0.4.0 — Triage Core
 
-The next version should make DataPeek a stronger dataset triage assistant while preserving its first-contact scope.
+The next version should make DataPeek a stronger deterministic triage assistant while preserving its first-contact scope.
 
 Goal:
 
 > Tell me what this dataset appears to be, what looks risky, and what I should check next.
 
-Planned direction:
+Committed scope:
 - dataset orientation summary
 - column role detection
-- stronger data quality signals
+- stronger deterministic data quality signals
 - capped categorical top values
 - lightweight “next checks”
-- schema comparison
-- markdown and JSON export
-- larger-file performance improvements
+- Markdown report download
+- self-contained HTML report download
+- environment-backed operational settings
 
-This version should improve guidance and signal quality without adding full EDA behavior.
+Operational settings should cover:
+- max upload/object size
+- large-file warning threshold
+- random sample row count
+- head/tail row count
+- sample value count
+- text truncation length
+- top-values cap
+- S3 download timeout
+
+Explicitly deferred from 0.4.0:
+- JSON export
+- schema comparison
+- larger-file/streaming performance work
+- YAML/settings-file support
+- UI-managed tuning
+- configurable heuristic thresholds
+
+Implementation blocks:
+1. Lock this PRD scope.
+2. Add central operational settings.
+3. Introduce a structured profile/report model.
+4. Add column roles and stronger quality signals.
+5. Add orientation summary, top values, and next checks.
+6. Add Markdown and HTML report downloads.
+7. Prepare the 0.4.0 release.
+
+This version should improve guidance and signal quality without adding full EDA behavior or persistence.
 
 ---
 
@@ -400,9 +427,11 @@ df.sample(n=10, seed=42)
 
 ## 16. Future Extensions
 
-- top values for categorical columns  
-- markdown export  
+- JSON export  
 - schema comparison  
+- larger-file/streaming performance  
+- YAML/settings-file support  
+- UI-managed tuning  
 - drift detection  
 - join key suggestions  
 - RAG integration  
