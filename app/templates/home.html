@@ -8,19 +8,20 @@
   <section class="panel">
     <form action="/analyze" method="post" enctype="multipart/form-data" class="upload-form" id="upload-form">
       <div class="upload-source upload-source-file">
-        <label for="dataset" class="label">Dataset file</label>
-        <p class="input-help">CSV or Parquet.</p>
+        <div>
+          <label for="dataset" class="label">Dataset source</label>
+          <p class="input-help" id="source-summary">Choose a CSV/Parquet file or enter an S3 / MinIO URI.</p>
+        </div>
         <input id="dataset" name="dataset" type="file" accept=".csv,.parquet" class="sr-only">
         <input id="dataset-name" name="dataset_name" type="hidden">
-        <button type="button" id="upload-trigger">Upload & analyze</button>
+        <button type="button" class="secondary-button" id="upload-trigger">Choose file</button>
       </div>
       <div class="upload-source upload-source-s3">
-        <label for="s3-uri" class="label">S3 / MinIO object</label>
         <div class="s3-controls">
           <input id="s3-uri" name="s3_uri" type="text" inputmode="url" placeholder="s3://bucket/path/data.csv">
-          <button type="submit">Analyze S3</button>
         </div>
       </div>
+      <button type="submit" id="analyze-submit">Analyze</button>
     </form>
     {% if error_message %}
       <p class="message error">{{ error_message }}</p>
@@ -240,20 +241,52 @@
       const form = document.getElementById("upload-form");
       const fileInput = document.getElementById("dataset");
       const filenameInput = document.getElementById("dataset-name");
+      const s3Input = document.getElementById("s3-uri");
+      const sourceSummary = document.getElementById("source-summary");
+      const analyzeSubmit = document.getElementById("analyze-submit");
       const trigger = document.getElementById("upload-trigger");
 
-      if (!form || !fileInput || !filenameInput || !trigger) {
+      if (!form || !fileInput || !filenameInput || !s3Input || !sourceSummary || !analyzeSubmit || !trigger) {
         return;
       }
 
+      const syncSubmit = () => {
+        const [file] = fileInput.files || [];
+        const s3Uri = s3Input.value.trim();
+        analyzeSubmit.disabled = !file && !s3Uri;
+        if (file) {
+          sourceSummary.textContent = file.name;
+        } else if (s3Uri) {
+          sourceSummary.textContent = s3Uri;
+        } else {
+          sourceSummary.textContent = "Choose a CSV/Parquet file or enter an S3 / MinIO URI.";
+        }
+      };
+
+      syncSubmit();
       trigger.addEventListener("click", () => fileInput.click());
+      s3Input.addEventListener("input", () => {
+        if (s3Input.value.trim()) {
+          fileInput.value = "";
+          filenameInput.value = "";
+        }
+        syncSubmit();
+      });
       fileInput.addEventListener("change", () => {
         const [file] = fileInput.files || [];
         if (!file) {
+          syncSubmit();
           return;
         }
         filenameInput.value = file.name;
-        form.requestSubmit();
+        s3Input.value = "";
+        syncSubmit();
+      });
+      form.addEventListener("submit", (event) => {
+        const [file] = fileInput.files || [];
+        if (!file && !s3Input.value.trim()) {
+          event.preventDefault();
+        }
       });
     })();
   </script>

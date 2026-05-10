@@ -145,9 +145,9 @@ h2 {
 
 .upload-form {
   display: grid;
-  grid-template-columns: minmax(220px, auto) minmax(280px, 1fr);
-  gap: 0.75rem;
-  align-items: center;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(360px, 1.15fr) auto;
+  gap: 0.9rem;
+  align-items: end;
   width: 100%;
 }
 
@@ -156,16 +156,14 @@ h2 {
 }
 
 .upload-source-file {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
 }
 
 .s3-controls {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.5rem;
-  align-items: center;
+  display: block;
 }
 
 .label,
@@ -214,6 +212,7 @@ button {
   padding: 0.6rem 0.9rem;
   font: inherit;
   cursor: pointer;
+  white-space: nowrap;
   transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
 }
 
@@ -229,6 +228,27 @@ button:hover {
 
 button:active {
   transform: translateY(0);
+}
+
+.secondary-button {
+  background: #f8fbff;
+  color: var(--accent);
+}
+
+.secondary-button:hover {
+  background: var(--accent-soft);
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.48;
+  transform: none;
+}
+
+button:disabled:hover {
+  background: var(--accent);
+  box-shadow: none;
+  transform: none;
 }
 
 .message {
@@ -402,6 +422,10 @@ summary {
   }
 
   .upload-form {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-source-file {
     grid-template-columns: 1fr;
   }
 

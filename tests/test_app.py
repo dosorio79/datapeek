@@ -278,6 +278,7 @@ def test_home_renders_help_menu():
     assert response.status_code == 200
     assert "S3-compatible URI" in response.text
     assert "DATAPEEK_S3_ENDPOINT_URL" in response.text
+    assert 'id="analyze-submit"' in response.text
 
 
 def test_resample_renders_validation_errors(monkeypatch):
