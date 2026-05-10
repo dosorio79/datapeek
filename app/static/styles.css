@@ -168,7 +168,7 @@ h2 {
 .upload-form {
   display: grid;
   gap: 0.6rem;
-  width: min(100%, 760px);
+  width: min(100%, 640px);
 }
 
 .source-switch {
@@ -225,16 +225,16 @@ h2 {
 .source-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.55rem;
-  align-items: end;
+  gap: 0.65rem;
+  align-items: center;
   min-width: 0;
 }
 
 .upload-source {
   min-width: 0;
-  padding: 0.62rem 0.7rem;
+  padding: 0.58rem 0.7rem;
   border: 1px solid #d6e1ef;
-  border-radius: 6px 0 0 6px;
+  border-radius: 6px;
   background: #f8fbff;
 }
 
@@ -255,9 +255,9 @@ h2 {
 }
 
 #analyze-submit {
-  min-height: 3.15rem;
+  min-height: 2.85rem;
   padding-inline: 1.15rem;
-  border-radius: 0 6px 6px 0;
+  border-radius: 6px;
 }
 
 [hidden] {
@@ -533,11 +533,6 @@ summary {
   .source-body {
     grid-template-columns: 1fr;
     justify-self: stretch;
-  }
-
-  .upload-source,
-  #analyze-submit {
-    border-radius: 6px;
   }
 
   .upload-source-file {
