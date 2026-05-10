@@ -278,6 +278,8 @@ def test_home_renders_help_menu():
     response = client.get("/")
 
     assert response.status_code == 200
+    assert "Analyze dataset" in response.text
+    assert "Choose a local CSV/Parquet file or a configured S3-compatible object." in response.text
     assert 'name="source_mode" value="file" checked' in response.text
     assert 'name="source_mode" value="s3"' in response.text
     assert 'data-source-panel="file"' in response.text

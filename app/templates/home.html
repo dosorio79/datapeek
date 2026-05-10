@@ -5,7 +5,11 @@
     <img src="/static/logo.png?v=2" alt="DataPeek" class="brand-logo">
   </section>
 
-  <section class="panel">
+  <section class="panel source-picker">
+    <div class="source-picker-heading">
+      <h2>Analyze dataset</h2>
+      <p>Choose a local CSV/Parquet file or a configured S3-compatible object.</p>
+    </div>
     <form action="/analyze" method="post" enctype="multipart/form-data" class="upload-form" id="upload-form">
       <fieldset class="source-switch" aria-label="Dataset source">
         <legend class="label">Dataset source</legend>
@@ -19,7 +23,7 @@
         </label>
       </fieldset>
 
-      <div class="source-row">
+      <div class="source-body">
         <div class="upload-source upload-source-file" data-source-panel="file">
           <div class="field-heading">
             <label for="dataset" class="label">Local file</label>
@@ -34,8 +38,8 @@
           <input id="s3-uri" name="s3_uri" type="text" inputmode="url" placeholder="s3://bucket/path/data.csv">
           <p class="input-help">Uses the server-configured object storage credentials.</p>
         </div>
+        <button type="submit" id="analyze-submit">Analyze</button>
       </div>
-      <button type="submit" id="analyze-submit">Analyze</button>
     </form>
     {% if error_message %}
       <p class="message error">{{ error_message }}</p>
