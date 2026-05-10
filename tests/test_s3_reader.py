@@ -95,3 +95,32 @@ def test_downloads_from_minio_style_endpoint_with_signed_request():
     assert observed["path"] == "/datasets/folder/data.csv"
     assert observed["authorization"].startswith("AWS4-HMAC-SHA256 Credential=minioadmin/")
     assert observed["content_hash"] == "UNSIGNED-PAYLOAD"
+
+
+def test_anonymous_403_explains_public_and_private_access_options(monkeypatch):
+    class Forbidden(s3_reader.HTTPError):
+        def __init__(self):
+            super().__init__("http://example.com/object.csv", 403, "Forbidden", hdrs=None, fp=None)
+
+    def deny(*, url, config, max_bytes):
+        raise Forbidden()
+
+    monkeypatch.setattr(s3_reader, "read_s3_url", deny)
+
+    try:
+        s3_reader.download_s3_object(
+            bucket="datasets",
+            key="folder/data.csv",
+            max_bytes=1024,
+            environ={},
+        )
+    except S3ReadError as exc:
+        message = str(exc)
+        assert "S3 access denied (HTTP 403)" in message
+        assert "If this object should be public" in message
+        assert "bucket policy" in message
+        assert "requester-pays" in message
+        assert "DATAPEEK_S3_ACCESS_KEY_ID" in message
+        assert "DATAPEEK_S3_ENDPOINT_URL" in message
+    else:
+        raise AssertionError("Expected anonymous 403 to explain credential configuration")

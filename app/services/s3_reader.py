@@ -74,10 +74,7 @@ def download_s3_object(
             raise S3ReadError(_oversized_message(max_bytes))
         return content
 
-    detail = ""
-    if isinstance(last_error, HTTPError):
-        detail = f" HTTP {last_error.code}."
-    raise S3ReadError(f"Could not download S3 object. Confirm the URI, endpoint, and credentials are correct.{detail}")
+    raise S3ReadError(_download_error_message(error=last_error, config=config))
 
 
 def s3_client_config_from_env(environ: Mapping[str, str]) -> S3ClientConfig:
@@ -210,3 +207,20 @@ def _s3_sigv4_signing_key(secret_access_key: str, datestamp: str, region: str) -
 def _oversized_message(max_bytes: int) -> str:
     max_mb = max_bytes // (1024 * 1024)
     return f"Upload is too large. DataPeek currently supports files up to {max_mb} MB."
+
+
+def _download_error_message(*, error: Exception | None, config: S3ClientConfig) -> str:
+    if isinstance(error, HTTPError) and error.code == 403:
+        if config.has_credentials:
+            return "S3 access denied (HTTP 403). Check the bucket policy, credentials, region, and endpoint."
+        return (
+            "S3 access denied (HTTP 403). If this object should be public, check the bucket policy, public access "
+            "settings, requester-pays status, bucket name, and object path. For private buckets, configure "
+            "DATAPEEK_S3_ACCESS_KEY_ID and DATAPEEK_S3_SECRET_ACCESS_KEY; for MinIO/custom S3, also configure "
+            "DATAPEEK_S3_ENDPOINT_URL."
+        )
+    if isinstance(error, HTTPError) and error.code == 404:
+        return "S3 object not found (HTTP 404). Check the bucket name and object path."
+    if isinstance(error, HTTPError):
+        return f"Could not download S3 object. HTTP {error.code}."
+    return "Could not download S3 object. Confirm the URI, endpoint, and credentials are correct."
