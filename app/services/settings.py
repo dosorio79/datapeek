@@ -8,7 +8,7 @@ BYTES_PER_MB = 1024 * 1024
 
 
 class SettingsError(ValueError):
-    """Invalid DataPeek runtime configuration."""
+    """Invalid DatasetPeek runtime configuration."""
 
     pass
 
@@ -42,20 +42,45 @@ def get_settings(environ: Mapping[str, str] | None = None) -> AppSettings:
 
     env = os.environ if environ is None else environ
     return AppSettings(
-        max_upload_mb=_env_positive_int(env, "DATAPEEK_MAX_UPLOAD_MB", 100),
-        large_file_warning_mb=_env_positive_int(env, "DATAPEEK_LARGE_FILE_WARNING_MB", 50),
-        random_sample_rows=_env_positive_int(env, "DATAPEEK_RANDOM_SAMPLE_ROWS", 10),
-        head_tail_rows=_env_positive_int(env, "DATAPEEK_HEAD_TAIL_ROWS", 5),
-        sample_value_count=_env_positive_int(env, "DATAPEEK_SAMPLE_VALUE_COUNT", 3),
-        text_truncate_chars=_env_positive_int(env, "DATAPEEK_TEXT_TRUNCATE_CHARS", 50),
-        top_values_limit=_env_positive_int(env, "DATAPEEK_TOP_VALUES_LIMIT", 5),
-        s3_download_timeout_seconds=_env_positive_int(env, "DATAPEEK_S3_DOWNLOAD_TIMEOUT_SECONDS", 30),
+        max_upload_mb=_env_positive_int(env, "DATASETPEEK_MAX_UPLOAD_MB", "DATAPEEK_MAX_UPLOAD_MB", default=100),
+        large_file_warning_mb=_env_positive_int(
+            env,
+            "DATASETPEEK_LARGE_FILE_WARNING_MB",
+            "DATAPEEK_LARGE_FILE_WARNING_MB",
+            default=50,
+        ),
+        random_sample_rows=_env_positive_int(
+            env,
+            "DATASETPEEK_RANDOM_SAMPLE_ROWS",
+            "DATAPEEK_RANDOM_SAMPLE_ROWS",
+            default=10,
+        ),
+        head_tail_rows=_env_positive_int(env, "DATASETPEEK_HEAD_TAIL_ROWS", "DATAPEEK_HEAD_TAIL_ROWS", default=5),
+        sample_value_count=_env_positive_int(
+            env,
+            "DATASETPEEK_SAMPLE_VALUE_COUNT",
+            "DATAPEEK_SAMPLE_VALUE_COUNT",
+            default=3,
+        ),
+        text_truncate_chars=_env_positive_int(
+            env,
+            "DATASETPEEK_TEXT_TRUNCATE_CHARS",
+            "DATAPEEK_TEXT_TRUNCATE_CHARS",
+            default=50,
+        ),
+        top_values_limit=_env_positive_int(env, "DATASETPEEK_TOP_VALUES_LIMIT", "DATAPEEK_TOP_VALUES_LIMIT", default=5),
+        s3_download_timeout_seconds=_env_positive_int(
+            env,
+            "DATASETPEEK_S3_DOWNLOAD_TIMEOUT_SECONDS",
+            "DATAPEEK_S3_DOWNLOAD_TIMEOUT_SECONDS",
+            default=30,
+        ),
     )
 
 
-def _env_positive_int(environ: Mapping[str, str], key: str, default: int) -> int:
-    raw_value = environ.get(key)
-    if raw_value is None or raw_value.strip() == "":
+def _env_positive_int(environ: Mapping[str, str], *keys: str, default: int) -> int:
+    key, raw_value = _first_env_value(environ, *keys)
+    if key is None or raw_value is None or raw_value.strip() == "":
         return default
     try:
         value = int(raw_value)
@@ -64,3 +89,11 @@ def _env_positive_int(environ: Mapping[str, str], key: str, default: int) -> int
     if value < 1:
         raise SettingsError(f"{key} must be a positive integer.")
     return value
+
+
+def _first_env_value(environ: Mapping[str, str], *keys: str) -> tuple[str | None, str | None]:
+    for key in keys:
+        value = environ.get(key)
+        if value is not None:
+            return key, value
+    return None, None

@@ -1,11 +1,11 @@
-# PRD — DataPeek
+# PRD — DatasetPeek
 ### Fast, minimal profiler for CSV & Parquet
 
 ---
 
 ## 1. Product Overview
 
-**Name:** DataPeek  
+**Name:** DatasetPeek  
 **Type:** Single-page web app  
 **Current version:** 0.3.0  
 
@@ -40,7 +40,7 @@ Focus:
 
 ### 0.4.0 — Triage Core
 
-The next version should make DataPeek a stronger deterministic triage assistant while preserving its first-contact scope.
+The next version should make DatasetPeek a stronger deterministic triage assistant while preserving its first-contact scope.
 
 Goal:
 
@@ -89,7 +89,7 @@ This version should improve guidance and signal quality without adding full EDA 
 
 ### 1.0.0 — Stable First-Contact Profiler
 
-A polished, reliable version of DataPeek once the core first-contact profiling experience is complete and stable.
+A polished, reliable version of DatasetPeek once the core first-contact profiling experience is complete and stable.
 
 A `1.0.0` release should represent:
 - stable CSV and Parquet handling
@@ -440,7 +440,7 @@ df.sample(n=10, seed=42)
 
 ## 17. Positioning
 
-> DataPeek is not an EDA tool.  
+> DatasetPeek is not an EDA tool.  
 > It is a **first-contact data profiler**.
 
 ---

@@ -56,10 +56,10 @@ def test_read_uploaded_csv_and_detect_signals():
 
 
 def test_profile_uses_operational_display_settings(monkeypatch):
-    monkeypatch.setenv("DATAPEEK_RANDOM_SAMPLE_ROWS", "3")
-    monkeypatch.setenv("DATAPEEK_HEAD_TAIL_ROWS", "2")
-    monkeypatch.setenv("DATAPEEK_SAMPLE_VALUE_COUNT", "1")
-    monkeypatch.setenv("DATAPEEK_TEXT_TRUNCATE_CHARS", "8")
+    monkeypatch.setenv("DATASETPEEK_RANDOM_SAMPLE_ROWS", "3")
+    monkeypatch.setenv("DATASETPEEK_HEAD_TAIL_ROWS", "2")
+    monkeypatch.setenv("DATASETPEEK_SAMPLE_VALUE_COUNT", "1")
+    monkeypatch.setenv("DATASETPEEK_TEXT_TRUNCATE_CHARS", "8")
     uploaded_file = UploadedFile(
         filename="sample_profile.csv",
         content=(FIXTURE_DIR / "sample_profile.csv").read_bytes(),
@@ -102,7 +102,7 @@ def test_read_uploaded_parquet(tmp_path):
 
 def test_extracts_filename_from_multipart_request_when_files_are_raw_bytes():
     csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
-    boundary = "----DataPeekBoundary"
+    boundary = "----DatasetPeekBoundary"
     body = (
         f"--{boundary}\r\n"
         'Content-Disposition: form-data; name="dataset"; filename="sample_profile.csv"\r\n'
@@ -123,7 +123,7 @@ def test_extracts_filename_from_multipart_request_when_files_are_raw_bytes():
 
 def test_extracts_upload_from_multipart_request_when_files_are_missing():
     csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
-    boundary = "----DataPeekBoundary"
+    boundary = "----DatasetPeekBoundary"
     body = (
         f"--{boundary}\r\n"
         'Content-Disposition: form-data; name="dataset"; filename="sample_profile.csv"\r\n'
@@ -144,7 +144,7 @@ def test_extracts_upload_from_multipart_request_when_files_are_missing():
 def test_multipart_extraction_selects_dataset_part_only():
     csv_bytes = b"id,name\n1,Alice\n"
     decoy_bytes = b"not,the,dataset\n"
-    boundary = "----DataPeekBoundary"
+    boundary = "----DatasetPeekBoundary"
     body = (
         f"--{boundary}\r\n"
         'Content-Disposition: form-data; name="attachment"; filename="decoy.csv"\r\n'
@@ -167,7 +167,7 @@ def test_multipart_extraction_selects_dataset_part_only():
 
 def test_extracts_filename_from_string_multipart_body():
     csv_bytes = (FIXTURE_DIR / "sample_profile.csv").read_bytes()
-    boundary = "----DataPeekBoundary"
+    boundary = "----DatasetPeekBoundary"
     body = (
         f"--{boundary}\r\n"
         'Content-Disposition: form-data; name="dataset"; filename="original_name.csv"\r\n'
@@ -186,7 +186,7 @@ def test_extracts_filename_from_string_multipart_body():
 
 
 def test_rejects_oversized_upload(monkeypatch):
-    monkeypatch.setenv("DATAPEEK_MAX_UPLOAD_MB", "1")
+    monkeypatch.setenv("DATASETPEEK_MAX_UPLOAD_MB", "1")
     oversized_csv = b"id,name\n" + (b"1,Alice\n" * 150000)
 
     try:
@@ -318,7 +318,7 @@ def test_home_renders_help_menu():
     assert "Uses the server-configured object storage credentials." in response.text
     assert "row count" in response.text
     assert "S3-compatible URI" in response.text
-    assert "DATAPEEK_S3_ENDPOINT_URL" in response.text
+    assert "DATASETPEEK_S3_ENDPOINT_URL" in response.text
     assert 'id="analyze-submit"' in response.text
 
 

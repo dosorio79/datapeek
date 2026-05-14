@@ -14,7 +14,7 @@ def empty_view_model(*, error_message: str | None = None) -> dict[str, Any]:
 
     settings = get_settings()
     return {
-        "page_title": "DataPeek",
+        "page_title": "DatasetPeek",
         "settings": settings,
         "error_message": error_message,
         "file_summary": None,
@@ -43,7 +43,7 @@ def build_profile_view_model(
 ) -> dict[str, Any]:
     """Build the single-page profile context from a loaded dataset.
 
-    This function is the product surface for the profiler: it keeps DataPeek to
+    This function is the product surface for the profiler: it keeps DatasetPeek to
     a fast first-contact summary, column signals, small previews, and no EDA UI.
     """
 
@@ -87,7 +87,7 @@ def build_profile_view_model(
 
     sample_frame = _sample_frame(dataframe, sample_seed, settings=settings)
     return {
-        "page_title": "DataPeek",
+        "page_title": "DatasetPeek",
         "settings": settings,
         "error_message": None,
         "file_summary": {
@@ -208,6 +208,6 @@ def _size_warning(content: bytes, *, settings: AppSettings) -> list[str]:
         return []
     size_mb = len(content) / (1024 * 1024)
     return [
-        f"Large file ({size_mb:.1f} MB). DataPeek accepts up to {settings.max_upload_mb} MB, "
+        f"Large file ({size_mb:.1f} MB). DatasetPeek accepts up to {settings.max_upload_mb} MB, "
         "but smaller files profile more reliably."
     ]

@@ -23,14 +23,14 @@ def test_settings_defaults_match_current_runtime_behavior():
 def test_settings_read_operational_overrides_from_env():
     settings = get_settings(
         {
-            "DATAPEEK_MAX_UPLOAD_MB": "2",
-            "DATAPEEK_LARGE_FILE_WARNING_MB": "1",
-            "DATAPEEK_RANDOM_SAMPLE_ROWS": "4",
-            "DATAPEEK_HEAD_TAIL_ROWS": "2",
-            "DATAPEEK_SAMPLE_VALUE_COUNT": "1",
-            "DATAPEEK_TEXT_TRUNCATE_CHARS": "12",
-            "DATAPEEK_TOP_VALUES_LIMIT": "3",
-            "DATAPEEK_S3_DOWNLOAD_TIMEOUT_SECONDS": "7",
+            "DATASETPEEK_MAX_UPLOAD_MB": "2",
+            "DATASETPEEK_LARGE_FILE_WARNING_MB": "1",
+            "DATASETPEEK_RANDOM_SAMPLE_ROWS": "4",
+            "DATASETPEEK_HEAD_TAIL_ROWS": "2",
+            "DATASETPEEK_SAMPLE_VALUE_COUNT": "1",
+            "DATASETPEEK_TEXT_TRUNCATE_CHARS": "12",
+            "DATASETPEEK_TOP_VALUES_LIMIT": "3",
+            "DATASETPEEK_S3_DOWNLOAD_TIMEOUT_SECONDS": "7",
         }
     )
 
@@ -44,7 +44,13 @@ def test_settings_read_operational_overrides_from_env():
     assert settings.s3_download_timeout_seconds == 7
 
 
+def test_settings_accept_legacy_datapeek_env_names():
+    settings = get_settings({"DATAPEEK_MAX_UPLOAD_MB": "2"})
+
+    assert settings.max_upload_mb == 2
+
+
 @pytest.mark.parametrize("value", ["0", "-1", "abc"])
 def test_settings_reject_invalid_positive_integer(value):
-    with pytest.raises(SettingsError, match="DATAPEEK_MAX_UPLOAD_MB"):
-        get_settings({"DATAPEEK_MAX_UPLOAD_MB": value})
+    with pytest.raises(SettingsError, match="DATASETPEEK_MAX_UPLOAD_MB"):
+        get_settings({"DATASETPEEK_MAX_UPLOAD_MB": value})

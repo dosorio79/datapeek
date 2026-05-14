@@ -356,7 +356,7 @@ def _validate_upload_size(content: bytes, *, settings: AppSettings) -> None:
 
 def _raise_oversized_upload(*, settings: AppSettings) -> None:
     max_mb = settings.max_upload_mb
-    raise FileValidationError(f"Upload is too large. DataPeek currently supports files up to {max_mb} MB.")
+    raise FileValidationError(f"Upload is too large. DatasetPeek currently supports files up to {max_mb} MB.")
 
 
 def _file_type_from_filename(filename: str) -> str | None:
